@@ -1,13 +1,13 @@
-import { IUser } from "../models/user.model";
+import { IAuthResponse, IUser } from "../types/auth";
 
 export class ApiResponse {
 
     statusCode: Number;
-    Data: IUser;
+    Data: IAuthResponse;
     message: string;
     success: boolean;
 
-    constructor(statusCode: Number, Data: IUser, message = "Success") {
+    constructor(statusCode: Number, Data: IAuthResponse, message = "Success") {
 
         this.statusCode = statusCode;
         this.Data = Data;

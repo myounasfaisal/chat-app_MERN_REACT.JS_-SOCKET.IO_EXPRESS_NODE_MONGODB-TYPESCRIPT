@@ -1,16 +1,7 @@
 import mongoose from "mongoose";
 import bcryptjs from "bcryptjs"
+import { IUser } from "../types/auth";
 
-export interface IUser extends mongoose.Document {
-    _id: string,
-    name: string,
-    email: string,
-    password: string,
-    DoB: string,
-    profilePic: string,
-    accessToken: String,
-    comparePassword: (password: string) => Promise<boolean>;
-}
 
 const userSchema = new mongoose.Schema<IUser>({
     name: {
@@ -35,10 +26,6 @@ const userSchema = new mongoose.Schema<IUser>({
         type: String,
         default: ""
     },
-    accessToken: {
-        type: String,
-        default: ""
-    }
 }, { timestamps: true })
 
 
