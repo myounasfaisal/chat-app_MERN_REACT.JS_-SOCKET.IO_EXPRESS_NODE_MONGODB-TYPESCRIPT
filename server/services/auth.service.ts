@@ -137,7 +137,7 @@ class AuthService {
 
         const existingUser = await User.findOne({ email });
 
-        if (existingUser) {
+        if (!existingUser) {
 
             throw new ApiError("User does not exist", 409);
 
@@ -162,6 +162,10 @@ class AuthService {
 
         return user ? user : null;
     };
+
+    checkAuth=(req:Request) : IAuthResponse =>{
+        return req.user
+    }
 }
 
 const authService = new AuthService();

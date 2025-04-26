@@ -1,4 +1,4 @@
-import authService from "../services/AuthService";
+import authService from "../services/auth.service";
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
@@ -82,5 +82,24 @@ export const updateController = asyncWrapper(async (req: Request, res: Response)
         throw new ApiError("Internal Server Error", 505);
     }
 
-
 })
+
+export const checkAuthController=asyncWrapper(async(req:Request,res:Response)=>{
+    try {
+        
+        const user : IAuthResponse=authService.checkAuth(req);
+    
+        res.status(202).json(new ApiResponse(202,user,"Authenticated User"));
+    
+        if(!user){
+            throw new ApiError("User not found in the Body",404);
+        }
+    
+    } catch (error) {
+    
+        throw new ApiError("Internal Server Error",505);
+        
+    }
+        
+    
+    })
