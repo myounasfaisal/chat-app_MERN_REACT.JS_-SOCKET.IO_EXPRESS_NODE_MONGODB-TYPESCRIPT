@@ -1,13 +1,13 @@
-import { IAuthResponse, IUser } from "../types/auth";
+import { IAuthResponse, IUpdateDetails, IUser } from "../types/auth";
 
 export class ApiResponse {
 
     statusCode: Number;
-    Data: IAuthResponse;
+    Data: IAuthResponse | IUpdateDetails;
     message: string;
     success: boolean;
 
-    constructor(statusCode: Number, Data: IAuthResponse, message = "Success") {
+    constructor(statusCode: Number, Data: IAuthResponse | IUpdateDetails, message = "Success") {
 
         this.statusCode = statusCode;
         this.Data = Data;

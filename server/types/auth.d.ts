@@ -10,8 +10,16 @@ export interface IUser extends Document {
     comparePassword: (password: string) => Promise<boolean>;
 }
 
-export interface IAuthResponse{
-    user?:IUser,
-    newUser?:IUser,
-    token?:Jwt | string
+export interface IAuthResponse {
+    user?: IUser,
+    newUser?: IUser,
+    token?: Jwt | string | null
+}
+
+export interface IUpdateDetails {
+    name?:string,
+    email?: string,
+    password?: string,
+    DoB?: string,
+    profilePic?: string
 }

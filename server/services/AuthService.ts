@@ -1,93 +1,167 @@
 import User from "../models/user.model";
-import { IAuthResponse, IUser } from "../types/auth";
-import { Types, Document } from "mongoose";
+import { IAuthResponse, IUpdateDetails } from "../types/auth";
+import { Types } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request } from "express";
-import { ApiError } from "../utils/ApiError"; 
+import { ApiError } from "../utils/ApiError";
+import { uploadOnCloudinary } from "../utils/fileUploadCloudinary";
+import { UploadApiResponse } from "cloudinary";
 
 class AuthService {
-  generateTokens = (userId: Types.ObjectId | string): string => {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new ApiError("JWT Secret is not available", 500);
-    }
-    return jwt.sign({ userId }, jwtSecret, {
-      expiresIn: "7d",
-    });
-  };
 
-  registerUser = async (request: Request): Promise<IAuthResponse> => {
-    const { email, password, name, DoB, profilePic } = request.body;
+    generateTokens = (userId: Types.ObjectId | string): string => {
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            throw new ApiError("JWT Secret is not available", 500);
+        }
+        return jwt.sign({ userId }, jwtSecret, {
+            expiresIn: "7d",
+        });
+    };
 
-    if (!email || !password || !name || !DoB) {
-      throw new ApiError("Missing Email", 400);
-    }
+    registerUser = async (request: Request): Promise<IAuthResponse> => {
+        const { email, password, name, DoB } = request.body;
+        const profilePic = request.file;
 
-    if (!password) {
-        throw new ApiError("Missing password", 400);
-      }
+        if (!email) {
+            throw new ApiError("Missing Email", 400);
+        }
 
-      if (!name) {
-        throw new ApiError("Missing name", 400);
-      }
+        if (!password) {
+            throw new ApiError("Missing password", 400);
+        }
 
-      if ( !DoB) {
-        throw new ApiError("Missing Date of Birth", 400);
-      }
+        if (!name) {
+            throw new ApiError("Missing name", 400);
+        }
 
-    if (password.length < 6) {
-      throw new ApiError("Password should be at least 6 characters", 400);
-    }
+        if (!DoB) {
+            throw new ApiError("Missing Date of Birth", 400);
+        }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new ApiError("User with this email already exists", 409);
-    }
+        if (password.length < 6) {
+            throw new ApiError("Password should be at least 6 characters", 400);
+        }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🌩️ Add cloudinary logic here to upload profilePic if needed
 
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      DoB,
-      profilePic: profilePic || "",
-    });
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            throw new ApiError("User with this email already exists", 409);
+        }
 
-    const token = this.generateTokens(newUser._id);
-    return {  newUser,token };
-  };
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-  loginUser = async (request: Request): Promise<IAuthResponse> => {
-    const { email, password } = request.body;
+        let cloudinaryResponse: UploadApiResponse | undefined;
 
-    if (!email) {
-      throw new ApiError("Email is required", 400);
-    }
-    if (!password) {
-      throw new ApiError("Password is required", 400);
-    }
+        if (profilePic) {
+            cloudinaryResponse = await uploadOnCloudinary(profilePic.path)
+        }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw new ApiError("User not found", 404);
-    }
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            DoB,
+            profilePic: cloudinaryResponse ? cloudinaryResponse.secure_url : "",
+        });
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      throw new ApiError("Invalid credentials", 401);
-    }
+        const token = this.generateTokens(newUser._id);
+        return { newUser, token };
+    };
 
-    const token = this.generateTokens(user._id);
-    return { token, user };
-  };
+    loginUser = async (request: Request): Promise<IAuthResponse> => {
+        const { email, password } = request.body;
 
-  logoutUser = async (): Promise<{ message: string }> => {
-    return { message: "Logout successful (client should delete token)" };
-  };
+        if (!email) {
+            throw new ApiError("Email is required", 400);
+        }
+        if (!password) {
+            throw new ApiError("Password is required", 400);
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new ApiError("User not found", 404);
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            throw new ApiError("Invalid credentials", 401);
+        }
+
+        const token = this.generateTokens(user._id);
+        return { token, user };
+    };
+
+    logoutUser = async (): Promise<{ message: string }> => {
+        return { message: "Logout successful (client should delete token)" };
+    };
+
+    updateProfile = async (request: Request): Promise<IUpdateDetails | null> => {
+        const { _id, email, password, name, DoB } = request.body;
+        const profilePic = request.file;
+
+        let detailsToUpdate: IUpdateDetails = {
+            email: "",
+            password: "",
+            profilePic: "",
+            DoB: "",
+            name: ""
+        };
+
+        if (email) {
+            detailsToUpdate.email = email;
+        }
+
+        if (password) {
+
+            if (password.length < 6) {
+                throw new ApiError("Password should be at least 6 characters", 400);
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            detailsToUpdate.password = hashedPassword;
+        }
+
+        if (name) {
+            detailsToUpdate.name = name;
+        }
+
+        if (DoB) {
+
+            detailsToUpdate.DoB = DoB;
+
+        }
+
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+
+            throw new ApiError("User does not exist", 409);
+
+        }
+
+
+        let cloudinaryResponse: UploadApiResponse | undefined;
+
+        if (profilePic) {
+
+            cloudinaryResponse = await uploadOnCloudinary(profilePic.path);
+
+            if (cloudinaryResponse) {
+
+                detailsToUpdate.profilePic = cloudinaryResponse?.secure_url
+
+            }
+        }
+
+        const user = await User.findByIdAndUpdate(_id, detailsToUpdate, { new: true })
+
+
+        return user ? user : null;
+    };
 }
 
 const authService = new AuthService();
