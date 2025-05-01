@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware";
 import { validateTokens } from "../middlewares/auth.middleware";
-import { checkAuthController, loginController, registerController, updateController } from "../controllers/auth.controller";
+import { checkAuthController, loginController, signupController, updateController } from "../controllers/auth.controller";
 
 const authRouter = Router()
 
-authRouter.route("/register").post(upload.single("profilePic"), registerController);
+authRouter.route("/signup").post(upload.single("profilePic"), signupController);
 authRouter.route("/login").post(loginController);
 
 

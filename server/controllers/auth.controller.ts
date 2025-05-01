@@ -5,24 +5,25 @@ import { ApiError } from "../utils/ApiError";
 import { IAuthResponse, IUpdateDetails } from "../types/auth";
 import { asyncWrapper } from "../utils/asyncWrapper";
 
-export const registerController = asyncWrapper(async (req: Request, res: Response) => {
+export const signupController = asyncWrapper(async (req: Request, res: Response) => {
     try {
-        const { token, newUser } = await authService.registerUser(req);
+        const { token, newUser } = await authService.signupUser(req);
 
         res.cookie("jwt", token, {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
+            sameSite: "lax",
             maxAge: 15 * 60 * 1000,
         });
 
         const response = new ApiResponse(201, { newUser, token } as IAuthResponse, "User registered successfully");
         res.status(response.statusCode as number).json(response);
     } catch (error) {
+        console.error("error : ",error);
         const status = error instanceof ApiError ? error.statusCode : 500;
         const message = error instanceof ApiError ? error.message : "Internal Server Error";
-        res.status(status).json(new ApiResponse(status, {} as any, message));
-    }
+        res.status(status).json(new ApiError(message,status));
+      }
 })
 
 export const loginController = asyncWrapper(async (req: Request, res: Response) => {
@@ -32,7 +33,7 @@ export const loginController = asyncWrapper(async (req: Request, res: Response) 
         res.cookie("jwt", token, {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
+            sameSite: "lax",
             maxAge: 15 * 60 * 1000,
         });
 
@@ -41,8 +42,8 @@ export const loginController = asyncWrapper(async (req: Request, res: Response) 
     } catch (error) {
         const status = error instanceof ApiError ? error.statusCode : 500;
         const message = error instanceof ApiError ? error.message : "Internal Server Error";
-        res.status(status).json(new ApiResponse(status, {} as any, message));
-    }
+        res.status(status).json(new ApiError(message,status));
+     }
 })
 
 export const logoutController = asyncWrapper(async (req: Request, res: Response) => {
@@ -52,7 +53,7 @@ export const logoutController = asyncWrapper(async (req: Request, res: Response)
         res.cookie("jwt", "", {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "none",
+            sameSite: "lax",
             maxAge: 1,
         });
 
@@ -61,7 +62,7 @@ export const logoutController = asyncWrapper(async (req: Request, res: Response)
     } catch (error) {
         const status = error instanceof ApiError ? error.statusCode : 500;
         const message = error instanceof ApiError ? error.message : "Internal Server Error";
-        res.status(status).json(new ApiResponse(status, {} as any, message));
+        res.status(status).json(new ApiError(message,status));
     }
 
 })
@@ -79,7 +80,10 @@ export const updateController = asyncWrapper(async (req: Request, res: Response)
 
 
     } catch (error) {
-        throw new ApiError("Internal Server Error", 505);
+        const status = error instanceof ApiError ? error.statusCode : 500;
+        const message = error instanceof ApiError ? error.message : "Internal Server Error";
+        res.status(status).json(new ApiError(message,status));
+    
     }
 
 })
@@ -97,8 +101,9 @@ export const checkAuthController=asyncWrapper(async(req:Request,res:Response)=>{
     
     } catch (error) {
     
-        throw new ApiError("Internal Server Error",505);
-        
+        const status = error instanceof ApiError ? error.statusCode : 500;
+        const message = error instanceof ApiError ? error.message : "Internal Server Error";
+        res.status(status).json(new ApiError(message,status));  
     }
         
     

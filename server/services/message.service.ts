@@ -1,6 +1,6 @@
 import { Request } from "express"
 import { ApiError } from "../utils/ApiError";
-import User from "../models/user.model";
+import {User} from "../models/user.model";
 import { IUser } from "../types";
 import Message from "../models/message.model";
 import { IMessage, IMessageResponse } from "../types/message";

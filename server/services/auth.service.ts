@@ -1,4 +1,3 @@
-import User from "../models/user.model";
 import { IAuthResponse, IUpdateDetails } from "../types/auth";
 import { Types } from "mongoose";
 import bcrypt from "bcryptjs";
@@ -7,6 +6,7 @@ import { Request } from "express";
 import { ApiError } from "../utils/ApiError";
 import { uploadOnCloudinary } from "../utils/fileUploadCloudinary";
 import { UploadApiResponse } from "cloudinary";
+import { User } from "../models/user.model";
 
 class AuthService {
 
@@ -15,60 +15,63 @@ class AuthService {
         if (!jwtSecret) {
             throw new ApiError("JWT Secret is not available", 500);
         }
-        return jwt.sign({ userId }, jwtSecret, {
+
+        const token= jwt.sign({ userId }, jwtSecret, {
             expiresIn: "7d",
-        });
+        })
+        console.log(token);
+        return token;
     };
 
-    registerUser = async (request: Request): Promise<IAuthResponse> => {
-        const { email, password, name, DoB } = request.body;
-        const profilePic = request.file;
+    signupUser = async (request: Request): Promise<IAuthResponse> => {
 
-        if (!email) {
-            throw new ApiError("Missing Email", 400);
-        }
+            const { email, password, name, DoB } = request.body;
+            const profilePic = request.file;
 
-        if (!password) {
-            throw new ApiError("Missing password", 400);
-        }
+            if (!email) {
+                throw new ApiError("Missing Email", 400);
+            }
 
-        if (!name) {
-            throw new ApiError("Missing name", 400);
-        }
+            if (!password) {
+                throw new ApiError("Missing password", 400);
+            }
 
-        if (!DoB) {
-            throw new ApiError("Missing Date of Birth", 400);
-        }
+            if (!name) {
+                throw new ApiError("Missing name", 400);
+            }
 
-        if (password.length < 6) {
-            throw new ApiError("Password should be at least 6 characters", 400);
-        }
+            if (!DoB) {
+                throw new ApiError("Missing Date of Birth", 400);
+            }
+
+            if (password.length < 6) {
+                throw new ApiError("Password should be at least 6 characters", 400);
+            }
+
+            const existingUser = await User.find({ email: email });
+            if (existingUser) {
+                throw new ApiError("User with this email already exists", 409);
+            }
 
 
+            let cloudinaryResponse: UploadApiResponse | undefined;
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            throw new ApiError("User with this email already exists", 409);
-        }
+            if (profilePic) {
+                cloudinaryResponse = await uploadOnCloudinary(profilePic.path)
+            }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = await User.create({
+                name,
+                email,
+                password,
+                DoB,
+                profilePic: cloudinaryResponse ? cloudinaryResponse.secure_url : "",
+            });
 
-        let cloudinaryResponse: UploadApiResponse | undefined;
-
-        if (profilePic) {
-            cloudinaryResponse = await uploadOnCloudinary(profilePic.path)
-        }
-
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            DoB,
-            profilePic: cloudinaryResponse ? cloudinaryResponse.secure_url : "",
-        });
-
-        const token = this.generateTokens(newUser._id);
-        return { newUser, token };
+            const token = this.generateTokens(newUser._id);
+            console.log("Signup Token : ",token);
+            return { newUser, token };
+        
     };
 
     loginUser = async (request: Request): Promise<IAuthResponse> => {
@@ -163,7 +166,7 @@ class AuthService {
         return user ? user : null;
     };
 
-    checkAuth=(req:Request) : IAuthResponse =>{
+    checkAuth = (req: Request): IAuthResponse => {
         return req.user
     }
 }
