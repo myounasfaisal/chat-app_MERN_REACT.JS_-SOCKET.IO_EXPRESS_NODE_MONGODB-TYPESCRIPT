@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import {Loader} from "lucide-react"
+import { useAuthStore } from '../store/Auth/useAuthStore'
 
 const HomePage = () => {
+ 
   return (
-    <div>HomePage</div>
+<div className="bg-primary text-primary-content">HomePage</div>
+
+
   )
 }
 

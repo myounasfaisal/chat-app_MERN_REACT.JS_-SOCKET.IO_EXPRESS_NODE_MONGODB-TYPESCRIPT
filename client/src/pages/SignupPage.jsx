@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuthStore } from "../store/useAuthStore";
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import { useAuthStore } from "../store/Auth/useAuthStore";
+import { Calendar, Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import AuthImagePattern from "../components/ui/AuthImagePattern";
@@ -8,15 +8,16 @@ import AuthImagePattern from "../components/ui/AuthImagePattern";
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     password: "",
+    DoB:""
   });
 
   const { signup, isSigningUp } = useAuthStore();
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.name.trim()) return toast.error("Full name is required");
     if (!formData.email.trim()) return toast.error("Email is required");
     if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
     if (!formData.password) return toast.error("Password is required");
@@ -29,6 +30,7 @@ const SignUpPage = () => {
     e.preventDefault();
 
     const success = validateForm();
+    console.log("wqdad")
 
     if (success === true) signup(formData);
   };
@@ -66,7 +68,7 @@ const SignUpPage = () => {
                   className={`input input-bordered w-full pl-10`}
                   placeholder="Enter Your Name..."
                   value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
             </div>
@@ -104,6 +106,7 @@ const SignUpPage = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+              
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -118,6 +121,19 @@ const SignUpPage = () => {
               </div>
             </div>
 
+            <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium" >Date Of Birth</span>
+                </label>
+                <div className="relative">
+                  <input
+                  type="date"
+                  value={formData.date}
+                  onInput={(e)=>setFormData({...formData,DoB:e.target.value})}
+                  />
+                </div>
+              </div>
+
             <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
               {isSigningUp ? (
                 <>
@@ -128,6 +144,9 @@ const SignUpPage = () => {
                 "Create Account"
               )}
             </button>
+
+
+
           </form>
 
           <div className="text-center">
@@ -143,9 +162,9 @@ const SignUpPage = () => {
 
       {/* right side */}
       <AuthImagePattern
-    title="Welcome to Our Chat App"
-    subtitle="Join conversations, connect with people, and start chatting in real-time!"
-  />
+        title="Welcome to Our Chat App"
+        subtitle="Join conversations, connect with people, and start chatting in real-time!"
+      />
     </div>
   );
 };
