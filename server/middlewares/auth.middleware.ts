@@ -34,7 +34,7 @@ export const validateTokens = asyncWrapper(async (req: Request, _: Response, nex
 
 
 
-        const user = await User.findById(decodedToken._id).select("-password");
+        const user = await User.findById(decodedToken.userId).select("-password");
         if (!user) {
             console.error(" User Not Found in Database");
             throw new ApiError("User not found", 404);

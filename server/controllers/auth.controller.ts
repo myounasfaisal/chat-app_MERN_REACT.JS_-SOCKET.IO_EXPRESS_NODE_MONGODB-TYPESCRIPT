@@ -40,6 +40,7 @@ export const loginController = asyncWrapper(async (req: Request, res: Response) 
         const response = new ApiResponse(200, { token, user } as IAuthResponse, "Login successful");
         res.status(response.statusCode as number).json(response);
     } catch (error) {
+        console.error("Login Error : ",error);
         const status = error instanceof ApiError ? error.statusCode : 500;
         const message = error instanceof ApiError ? error.message : "Internal Server Error";
         res.status(status).json(new ApiError(message,status));

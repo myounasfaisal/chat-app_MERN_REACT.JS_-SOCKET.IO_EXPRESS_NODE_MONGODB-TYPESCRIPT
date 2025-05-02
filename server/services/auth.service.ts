@@ -19,7 +19,6 @@ class AuthService {
         const token= jwt.sign({ userId }, jwtSecret, {
             expiresIn: "7d",
         })
-        console.log(token);
         return token;
     };
 
@@ -48,7 +47,7 @@ class AuthService {
                 throw new ApiError("Password should be at least 6 characters", 400);
             }
 
-            const existingUser = await User.find({ email: email });
+            const existingUser = await User.findOne({ email: email });
             if (existingUser) {
                 throw new ApiError("User with this email already exists", 409);
             }
@@ -84,7 +83,7 @@ class AuthService {
             throw new ApiError("Password is required", 400);
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email:email });
         if (!user) {
             throw new ApiError("User not found", 404);
         }
