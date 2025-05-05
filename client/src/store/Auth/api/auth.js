@@ -7,9 +7,10 @@ export const checkAuth = async (set) => {
             withCredentials: true, // Send cookies with the request
         });
         console.log("Authenticated:", res.data);
-        set({ authUser: res.data, isUserLoggedIn: true });
+        set({ authUser: res.data, isUserLoggedIn: false });
     } catch (error) {
         console.error("CheckAuth Error:", error.message);
+        set({ isUserLoggedIn: false});
     } finally {
         set({ isCheckingAuth: false });
     }

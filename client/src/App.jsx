@@ -1,6 +1,5 @@
 import './App.css'
-import { Routes,Route } from 'react-router-dom'
-import Navbar from './components/common/Navbar/Navbar'
+import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
@@ -8,48 +7,69 @@ import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
 import { useAuthStore } from './store/Auth/useAuthStore'
 import { useEffect } from 'react'
-import { Loader } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
+import Header from './components/common/Header/Header'
+import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute'
+import PublicRoute from './components/common/PublicRoute/PublicRoute'
 
 function App() {
-const pages=[{element:<HomePage/>,slug:"/"},
-  {element:<ProfilePage/>,slug:"/profile"},
-  {element:<SettingsPage/>,slug:"/settings"},
-  {element:<SignupPage/>,slug:"/signup"},
-  {element:<LoginPage/>,slug:"/login"}]
+  const { authUser, isUserLoggedIn,checkAuth } = useAuthStore();
 
-  const routedElements = pages.map((element, i) => (
-    <Route key={i} path={element.slug} element={element.element} />
-  ));
-  
-  const {authUser,isCheckingAuth,checkAuth}=useAuthStore();
 
   useEffect(() => {
     const init = async () => {
-      await checkAuth();
+      if (!authUser && !isUserLoggedIn) {
+        await checkAuth();
+      }
     };
     init();
-  }, [checkAuth]);
-  
-  if(!authUser && isCheckingAuth) return(
-    <div className=" w-screen h-screen flex items-center justify-center">
-  <Loader className="size-10 animate-spin" />
-</div>
-
-  )
-
+  }, [authUser, isUserLoggedIn]);
 
   return (
     <>
-          <Toaster position="top-right" reverseOrder={false} />
-      <Navbar/>
+      <Toaster position="top-right" reverseOrder={false} />
+      <Header />
 
-      
       <Routes>
-        {routedElements}
-      </Routes>
+  <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+  
+  <Route
+    path="/signup"
+    element={
+      <PublicRoute>
+        <SignupPage />
+      </PublicRoute>
+    }
+  />
+  <Route
+    path="/login"
+    element={
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    }
+  />
+
+  {/* 🔒 Protected Routes */}
+  <Route
+    path="/profile"
+    element={
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/settings"
+    element={
+      <ProtectedRoute>
+        <SettingsPage />
+      </ProtectedRoute>
+    }
+  />
+</Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
