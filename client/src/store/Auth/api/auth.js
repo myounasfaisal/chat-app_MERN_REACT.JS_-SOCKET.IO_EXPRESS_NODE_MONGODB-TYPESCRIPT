@@ -3,15 +3,17 @@ import toast from "react-hot-toast";
 
 export const checkAuth = async (set) => {
     try {
-        const res = await axiosInstance.get("/auth/check")
-        console.log(res);
-        set({ authUser: res.data });
+        const res = await axiosInstance.get("/auth/check", {
+            withCredentials: true, // Send cookies with the request
+        });
+        console.log("Authenticated:", res.data);
+        set({ authUser: res.data, isUserLoggedIn: true });
     } catch (error) {
-        console.error("Error : ", error.message);
+        console.error("CheckAuth Error:", error.message);
     } finally {
         set({ isCheckingAuth: false });
     }
-}
+};
 
 export const signUp = async (userDetails, set) => {
     try {
@@ -52,6 +54,7 @@ export const login = async (set,userDetails) =>{
         const { user } = res.data['Data'];
         set({ authUser: user });
         set({ isUserLoggedIn: true });
+        toast.success("User Logged In Successfully");
     } catch (error) {
         console.error("Login Error : ",error);
         toast.error("Failed To Login");
