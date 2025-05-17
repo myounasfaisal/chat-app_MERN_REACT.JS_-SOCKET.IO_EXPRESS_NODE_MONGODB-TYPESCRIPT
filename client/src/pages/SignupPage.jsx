@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/Auth/useAuthStore";
-import { Calendar, Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import {Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import AuthImagePattern from "../components/ui/AuthImagePattern";
@@ -13,6 +14,8 @@ const SignUpPage = () => {
     password: "",
     DoB:""
   });
+
+  const navigate=useNavigate();
 
   const { signup, isSigningUp } = useAuthStore();
 
@@ -30,9 +33,13 @@ const SignUpPage = () => {
     e.preventDefault();
 
     const success = validateForm();
-    console.log("wqdad")
 
-    if (success === true) signup(formData);
+    if (success === true) {
+    const isResponeValid = signup(formData);
+    if(isResponeValid){
+navigate("/");
+    }
+    }
   };
 
   return (

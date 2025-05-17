@@ -14,7 +14,8 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    login(formData);
+    console.log("submit ho ra ha login in handle submit")
+    await login(formData);
   };
 
   return (

@@ -6,8 +6,9 @@ export const checkAuth = async (set) => {
         const res = await axiosInstance.get("/auth/check", {
             withCredentials: true, // Send cookies with the request
         });
-        console.log("Authenticated:", res.data);
-        set({ authUser: res.data, isUserLoggedIn: false });
+        console.log("Authenticated : ", res.data['Data']);
+        const { user } = res.data['Data'];
+        set({ authUser: user },{isUserLoggedIn:true});
     } catch (error) {
         console.error("CheckAuth Error:", error.message);
         set({ isUserLoggedIn: false});
@@ -65,3 +66,22 @@ export const login = async (set,userDetails) =>{
     
     }
 }
+
+export const updateProfile = async (userDetails, set) => {
+    try {
+        set({ isUpdatingProfile: true });
+
+        const res = await axiosInstance.patch("/auth/update-profile", userDetails, {
+            withCredentials: true
+        });
+
+        const { updatedUser } = res.data.Data;
+        set({ authUser: updatedUser });
+        toast.success("Profile Updated Successfully");
+    } catch (error) {
+        console.error("Update Profile Error:", error);
+        toast.error("Failed to update profile");
+    } finally {
+        set({ isUpdatingProfile: false });
+    }
+};
