@@ -11,7 +11,7 @@ authRouter.route("/logout").get(logoutController);
 
 //Protected Routes
 
-authRouter.route("/update-profile").patch(validateTokens,updateController)
+authRouter.route("/update-profile").patch(validateTokens,upload.single("profilePic"),updateController)
 authRouter.route("/check").get(validateTokens,checkAuthController)
 
 export default authRouter;

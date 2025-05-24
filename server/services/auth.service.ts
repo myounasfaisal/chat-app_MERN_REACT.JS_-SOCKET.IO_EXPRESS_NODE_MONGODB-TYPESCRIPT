@@ -102,68 +102,31 @@ class AuthService {
     };
 
     updateProfile = async (request: Request): Promise<IUpdateDetails | null> => {
-        const { _id, email, password, name, DoB } = request.body;
+        const { _id } = request.user;
         const profilePic = request.file;
+    
+        let detailsToUpdate: Partial<IUpdateDetails> = {};
 
-        let detailsToUpdate: IUpdateDetails = {
-            email: "",
-            password: "",
-            profilePic: "",
-            DoB: "",
-            name: ""
-        };
-
-        if (email) {
-            detailsToUpdate.email = email;
+        if(!profilePic){
+            throw new ApiError("No profile picture Available", 404);
         }
-
-        if (password) {
-
-            if (password.length < 6) {
-                throw new ApiError("Password should be at least 6 characters", 400);
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-            detailsToUpdate.password = hashedPassword;
-        }
-
-        if (name) {
-            detailsToUpdate.name = name;
-        }
-
-        if (DoB) {
-
-            detailsToUpdate.DoB = DoB;
-
-        }
-
-        const existingUser = await User.findOne({ email });
-
-        if (!existingUser) {
-
-            throw new ApiError("User does not exist", 409);
-
-        }
-
-
-        let cloudinaryResponse: UploadApiResponse | undefined;
-
+    
         if (profilePic) {
-
-            cloudinaryResponse = await uploadOnCloudinary(profilePic.path);
-
+            const cloudinaryResponse = await uploadOnCloudinary(profilePic.path);
             if (cloudinaryResponse) {
-
-                detailsToUpdate.profilePic = cloudinaryResponse?.secure_url
-
+                detailsToUpdate.profilePic = cloudinaryResponse.secure_url;
             }
         }
-
-        const user = await User.findByIdAndUpdate(_id, detailsToUpdate, { new: true })
-
-
+    
+        // If no profilePic in request, you can optionally throw an error or just return null
+        if (!detailsToUpdate.profilePic) {
+            throw new ApiError("No profile picture uploaded", 400);
+        }
+    
+        const user = await User.findByIdAndUpdate(_id, detailsToUpdate, { new: true });
         return user ? user : null;
     };
+    
 
     checkAuth = (req: Request): IAuthResponse => {
         return req.user

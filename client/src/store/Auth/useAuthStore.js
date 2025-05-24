@@ -9,6 +9,7 @@ export const useAuthStore = create((set, get) => ({
     isLoggingIn: false,
     isSigningUp: false,
     isUpdatingProfile:false,
+    onlineUsers:[],
 
     checkAuth: () => checkAuth(set),
 
@@ -23,7 +24,6 @@ export const useAuthStore = create((set, get) => ({
     login: async (userDetails) => {
         await loginFn(set, userDetails)
         if (get().authUser) return true;
-        console.log("getting call.....")
         return false;
     },
 

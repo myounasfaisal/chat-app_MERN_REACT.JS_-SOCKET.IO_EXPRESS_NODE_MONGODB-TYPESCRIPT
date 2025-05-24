@@ -13,7 +13,7 @@ export const signupController = asyncWrapper(async (req: Request, res: Response)
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 15 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
         });
 
         const response = new ApiResponse(201, { newUser, token } as IAuthResponse, "User registered successfully");
@@ -34,7 +34,7 @@ export const loginController = asyncWrapper(async (req: Request, res: Response) 
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 15 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
         });
 
         const response = new ApiResponse(200, { token, user } as IAuthResponse, "Login successful");
@@ -83,6 +83,7 @@ export const updateController = asyncWrapper(async (req: Request, res: Response)
     } catch (error) {
         const status = error instanceof ApiError ? error.statusCode : 500;
         const message = error instanceof ApiError ? error.message : "Internal Server Error";
+        console.error(error);
         res.status(status).json(new ApiError(message,status));
     
     }
