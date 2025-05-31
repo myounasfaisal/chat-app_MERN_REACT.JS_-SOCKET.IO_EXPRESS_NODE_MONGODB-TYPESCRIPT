@@ -19,6 +19,6 @@ app.use("/api/auth",authRouter);
 
 
 import messageRouter from "./routes/message.route";
-app.use("/api/message",messageRouter);
+app.use("/api/messages",messageRouter);
 
 export default app;

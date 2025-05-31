@@ -1,32 +1,75 @@
-import { create } from "zustand"
-import { checkAuth, login as loginFn , logout, signUp, updateProfile } from "./api/auth"
+import { create } from "zustand";
+import { io } from "socket.io-client";
+import {
+  checkAuth,
+  login as loginFn,
+  logout as logoutFn,
+  signUp,
+  updateProfile,
+} from "./api/auth";
 
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
 export const useAuthStore = create((set, get) => ({
-    authUser: null,
-    isUserLoggedIn: false,
-    isCheckingAuth: true,
-    isLoggingIn: false,
-    isSigningUp: false,
-    isUpdatingProfile:false,
-    onlineUsers:[],
+  authUser: null,
+  isUserLoggedIn: false,
+  isCheckingAuth: true,
+  isLoggingIn: false,
+  isSigningUp: false,
+  isUpdatingProfile: false,
+  onlineUsers: [],
+  socket: null,
 
-    checkAuth: () => checkAuth(set),
+  // Auth actions
+  checkAuth: () => checkAuth(set, get),
+  signup: async (userDetails) => {
+    await signUp(userDetails, set, get);
+    return get().authUser ? true : false;
+  },
+  login: async (userDetails) => {
+    await loginFn(set, userDetails, get);
+    return get().authUser ? true : false;
+  },
+  logout: async () => {
+    await logoutFn(set, get);
+  },
+  updateProfile: async (userDetails) => {
+    await updateProfile(userDetails, set);
+  },
 
-    signup: async (userDetails) => {
-        await signUp(userDetails, set);
-        if (get().authUser) return true;
-        return false;
-    },
+  // WebSocket setup
+  connectSocket: () => {
+    const { authUser, socket } = get();
+    if (!authUser || socket?.connected) return;
 
-    logout: async () => logout(set),
+    const newSocket = io(BASE_URL, {
+      query: {
+        userId: authUser._id,
+      },
+      withCredentials: true,
+    });
 
-    login: async (userDetails) => {
-        await loginFn(set, userDetails)
-        if (get().authUser) return true;
-        return false;
-    },
+    set({ socket: newSocket });
 
-    updateProfile: async (userDetails) =>  await updateProfile(userDetails,set)
+    newSocket.on("connect", () => {
+      console.log("✅ Socket connected:", newSocket.id);
+    });
 
-}))
+    newSocket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+    });
+
+    newSocket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    const { socket } = get();
+    if (socket && socket.connected) {
+      socket.disconnect();
+      set({ socket: null, onlineUsers: [] });
+    }
+  },
+}));
+    
