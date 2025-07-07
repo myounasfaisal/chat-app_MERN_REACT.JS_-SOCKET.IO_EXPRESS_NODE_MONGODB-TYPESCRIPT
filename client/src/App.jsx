@@ -15,6 +15,7 @@ import PublicRoute from './components/common/PublicRoute/PublicRoute'
 function App() {
   const { authUser, isUserLoggedIn,checkAuth } = useAuthStore();
 
+  console.log("AuthUser in App : ",authUser);
 
   useEffect(() => {
     const init = async () => {
