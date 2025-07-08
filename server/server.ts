@@ -11,7 +11,7 @@ configDotenv();
 const server = http.createServer(app);
 
 // 3. Attach Socket.IO to the HTTP server
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: ["*",'http://localhost:5173'],
     credentials: true,

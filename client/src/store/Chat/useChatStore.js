@@ -36,33 +36,50 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: false });
     }
   },
-  sendMessage: async (messageData) => {
-    const { selectedUser, messages } = get();
-    try {
-      const res = await axiosInstance.post(`/messages/send-message/${selectedUser._id}`, messageData);
-      console.log("Message Response After sent : ",res.data['Data']);
-      set({ messages: [...messages, res.data.Data.message] });
-      console.log(messages);
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-  },
+sendMessage: async ({ text, file }) => {
+  const { selectedUser, messages } = get();
 
-  subscribeToMessages: () => {
-    const { selectedUser } = get();
-    if (!selectedUser) return;
+  const formData = new FormData();
+  if (text) formData.append("text", text);
+  if (file) formData.append("image", file);
 
-    const socket = useAuthStore.getState().socket;
+  try {
+    const res = await axiosInstance.post(
+      `/messages/send-message/${selectedUser._id}`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
 
-    socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+    console.log("Message Response After sent:", res.data.Data);
+    set({ messages: [...messages, res.data.Data.message] });
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Message send failed");
+  }
+},
 
-      set({
-        messages: [...get().messages, newMessage],
-      });
+
+ subscribeToMessages: () => {
+  const { selectedUser } = get();
+  if (!selectedUser) return;
+
+  const socket = useAuthStore.getState().socket;
+
+  socket.on("newMessage", (newMessage) => {
+    const { authUser } = useAuthStore.getState();
+
+    const isRelevant =
+      (newMessage.senderId === selectedUser._id && newMessage.recieverId === authUser._id) ||
+      (newMessage.senderId === authUser._id && newMessage.recieverId === selectedUser._id);
+
+    if (!isRelevant) return;
+
+    set({
+      messages: [...get().messages, newMessage],
     });
-  },
+  });
+},
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;

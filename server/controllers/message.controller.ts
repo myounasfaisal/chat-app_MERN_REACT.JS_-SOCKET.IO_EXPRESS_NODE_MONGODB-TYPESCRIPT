@@ -5,6 +5,7 @@ import { IMessage, IMessageResponse } from "../types/message";
 import { IUser } from "../types";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
+import { io } from "../server";
 
 export const getUsersController = asyncWrapper(async (req: Request, res: Response) => {
     try {
@@ -44,7 +45,7 @@ export const sendMessageController = asyncWrapper(async (req: Request, res: Resp
         if(!message){
             throw new ApiError("Failed to write message",424);
         }
-
+  io.emit("newMessage", message.message);
         res.status(200).json(new ApiResponse(200,message,"Message Created Successfully",))
 
     } catch (error) {

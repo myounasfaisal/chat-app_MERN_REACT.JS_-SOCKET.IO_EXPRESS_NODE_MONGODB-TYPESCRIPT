@@ -1,5 +1,5 @@
 import daisyui from 'daisyui';
-import themes from 'daisyui/theme/object';
+import theme from 'daisyui/theme/object';
 
 /** @type {import('tailwindcss').Config} */
 export default {
