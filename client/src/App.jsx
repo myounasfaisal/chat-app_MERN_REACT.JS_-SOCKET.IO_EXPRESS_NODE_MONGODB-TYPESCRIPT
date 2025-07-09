@@ -13,14 +13,19 @@ import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute'
 import PublicRoute from './components/common/PublicRoute/PublicRoute'
 
 function App() {
-  const { authUser, isUserLoggedIn,checkAuth } = useAuthStore();
+  const { authUser, isUserLoggedIn, checkAuth, connectSocket } = useAuthStore();
 
-  console.log("AuthUser in App : ",authUser);
+  console.log("AuthUser in App : ", authUser, isUserLoggedIn);
 
   useEffect(() => {
     const init = async () => {
+
       if (!authUser && !isUserLoggedIn) {
         await checkAuth();
+
+      } else {
+
+        await connectSocket();
       }
     };
     init();
@@ -32,43 +37,43 @@ function App() {
       <Header />
 
       <Routes>
-  <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-  
-  <Route
-    path="/signup"
-    element={
-      <PublicRoute>
-        <SignupPage />
-      </PublicRoute>
-    }
-  />
-  <Route
-    path="/login"
-    element={
-      <PublicRoute>
-        <LoginPage />
-      </PublicRoute>
-    }
-  />
+        <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
 
-  {/* 🔒 Protected Routes */}
-  <Route
-    path="/profile"
-    element={
-      <ProtectedRoute>
-        <ProfilePage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/settings"
-    element={
-      <ProtectedRoute>
-        <SettingsPage />
-      </ProtectedRoute>
-    }
-  />
-</Routes>
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <SignupPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+
+        {/* 🔒 Protected Routes */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </>
   );
 }

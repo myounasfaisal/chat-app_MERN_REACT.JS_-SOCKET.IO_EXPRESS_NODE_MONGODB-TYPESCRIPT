@@ -51,14 +51,17 @@ export const login = async (set, userDetails, get) => {
 
 export const logout = async (set, get) => {
     try {
-        await axiosInstance.get("/auth/logout");
         set({ authUser: null, isUserLoggedIn: false });
-        get().disconnectSocket();
+
+        const res = await axiosInstance.get("/auth/logout");
+        await get().disconnectSocket();
+
+        console.log(res)
         toast.success("User Logged Out Successfully");
     } catch (error) {
         console.error("Logout Error:", error);
         toast.error("Failed To Logout");
-    }
+        }
 };
 
 export const updateProfile = async (userDetails, set) => {
