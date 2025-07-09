@@ -16,7 +16,7 @@ const ChatContainer = () => {
     subscribeToMessages,
     unsubscribeFromMessages,
   } = useChatStore();
-  const { authUser } = useAuthStore();
+  const { authUser,onlineUsers } = useAuthStore();
   const messageEndRef = useRef(null);
 
   useEffect(() => {
@@ -64,6 +64,12 @@ const ChatContainer = () => {
                   }
                   alt="profile pic"
                 />
+                 {onlineUsers.includes(message.senderId) && (
+                <span
+                  className="absolute bottom-0 right-0 size-3 bg-green-500 
+                  rounded-full ring-2 ring-zinc-900"
+                />
+              )}
               </div>
             </div>
             <div className="chat-header mb-1">
