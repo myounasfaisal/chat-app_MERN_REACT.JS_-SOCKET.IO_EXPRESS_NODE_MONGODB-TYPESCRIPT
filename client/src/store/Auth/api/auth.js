@@ -70,8 +70,8 @@ export const updateProfile = async (userDetails, set) => {
         const res = await axiosInstance.patch("/auth/update-profile", userDetails, {
             withCredentials: true
         });
-        const { updatedUser } = res.data.Data;
-        set({ authUser: updatedUser });
+        const user  = res.data.Data;
+        set({ authUser: user });
         toast.success("Profile Updated Successfully");
     } catch (error) {
         console.error("Update Profile Error:", error);

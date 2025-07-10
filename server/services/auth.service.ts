@@ -101,31 +101,32 @@ class AuthService {
         return { message: "Logout successful (client should delete token)" };
     };
 
-    updateProfile = async (request: Request): Promise<IUpdateDetails | null> => {
-        const { _id } = request.user;
-        const profilePic = request.file;
-    
-        let detailsToUpdate: Partial<IUpdateDetails> = {};
+   updateProfile = async (request: Request): Promise<IUpdateDetails | null> => {
+  const { _id } = request.user;
+  const profilePic = request.file;
 
-        if(!profilePic){
-            throw new ApiError("No profile picture Available", 404);
-        }
-    
-        if (profilePic) {
-            const cloudinaryResponse = await uploadOnCloudinary(profilePic.path);
-            if (cloudinaryResponse) {
-                detailsToUpdate.profilePic = cloudinaryResponse.secure_url;
-            }
-        }
-    
-        // If no profilePic in request, you can optionally throw an error or just return null
-        if (!detailsToUpdate.profilePic) {
-            throw new ApiError("No profile picture uploaded", 400);
-        }
-    
-        const user = await User.findByIdAndUpdate(_id, detailsToUpdate, { new: true });
-        return user ? user : null;
-    };
+  if (!profilePic) {
+    throw new ApiError("No profile picture available", 404);
+  }
+
+  const cloudinaryResponse = await uploadOnCloudinary(profilePic.path);
+  if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
+    throw new ApiError("Cloudinary upload failed", 500);
+  }
+
+  const user = await User.findByIdAndUpdate(
+    _id,
+    { profilePic: cloudinaryResponse.secure_url },
+    { new: true }
+  );
+
+  if (!user) {
+    throw new ApiError("Failed to update user profile", 500);
+  }
+
+  return user ? user : null ;
+};
+
     
 
     checkAuth = (req: Request): IAuthResponse => {
