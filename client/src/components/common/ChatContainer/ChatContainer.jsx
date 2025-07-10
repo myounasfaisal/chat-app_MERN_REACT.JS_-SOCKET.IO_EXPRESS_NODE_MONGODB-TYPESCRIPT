@@ -16,14 +16,13 @@ const ChatContainer = () => {
     subscribeToMessages,
     unsubscribeFromMessages,
   } = useChatStore();
-  const { authUser,onlineUsers } = useAuthStore();
+
+  const { authUser, onlineUsers } = useAuthStore();
   const messageEndRef = useRef(null);
 
   useEffect(() => {
     getMessages(selectedUser._id);
-
     subscribeToMessages();
-
     return () => unsubscribeFromMessages();
   }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
@@ -48,51 +47,65 @@ const ChatContainer = () => {
       <ChatHeader />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message._id || message.tempId || Math.random()}
-            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-            ref={messageEndRef}
-          >
-            <div className=" chat-image avatar">
-              <div className="size-10 rounded-full border">
-                <img
-                  src={
-                    message.senderId === authUser._id
-                      ? authUser.profilePic || "/avatar.png"
-                      : selectedUser.profilePic || "/avatar.png"
-                  }
-                  alt="profile pic"
-                />
-                 {onlineUsers.includes(message.senderId) && (
-                <span
-                  className="absolute bottom-0 right-0 size-3 bg-green-500 
-                  rounded-full ring-2 ring-zinc-900"
-                />
-              )}
+        {messages.map((message) => {
+          const isSentByAuthUser = message.senderId === authUser._id;
+          const isSenderOnline = onlineUsers.includes(message.senderId);
+
+          return (
+            <div
+              key={message._id || message.tempId || Math.random()}
+              className={`chat ${isSentByAuthUser ? "chat-end" : "chat-start"}`}
+              ref={messageEndRef}
+            >
+              {/* Avatar */}
+              <div className="chat-image avatar relative">
+                <div className="size-10 rounded-full border border-base-300 overflow-hidden">
+                  <img
+                    src={
+                      isSentByAuthUser
+                        ? authUser.profilePic || "/avatar.png"
+                        : selectedUser.profilePic || "/avatar.png"
+                    }
+                    alt="profile pic"
+                  />
+                </div>
+                {isSenderOnline && (
+                  <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-white dark:ring-zinc-800" />
+                )}
+              </div>
+
+              {/* Timestamp */}
+              <div className="chat-header mb-1">
+                <time className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+              </div>
+
+              {/* Chat bubble */}
+              <div
+                className={`chat-bubble flex flex-col ${
+                  isSentByAuthUser
+                    ? "bg-primary text-primary-content"
+                    : "bg-base-200 text-base-content"
+                }`}
+              >
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="Attachment"
+                    className="sm:max-w-[200px] rounded-md mb-2"
+                  />
+                )}
+                {message.text && <p>{message.text}</p>}
               </div>
             </div>
-            <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
-                {formatMessageTime(message.createdAt)}
-              </time>
-            </div>
-            <div className="chat-bubble flex flex-col">
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
-              )}
-              {message.text && <p>{message.text}</p>}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <MessageInput />
     </div>
   );
 };
+
 export default ChatContainer;

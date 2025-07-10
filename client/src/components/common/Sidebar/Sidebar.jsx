@@ -7,7 +7,7 @@ import { Users } from "lucide-react";
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
 
-  const { onlineUsers } = useAuthStore();
+  const { authUser, onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   
@@ -18,9 +18,15 @@ const Sidebar = () => {
 
   console.log("Sidebar Check Users loading : ",users);
 
-  const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id))
-    : users;
+const filteredUsers = [...users]
+  .filter((user) => user._id !== authUser._id)
+  .sort((a, b) => {
+    const aOnline = onlineUsers.includes(a._id);
+    const bOnline = onlineUsers.includes(b._id);
+    return aOnline === bOnline ? 0 : aOnline ? -1 : 1;
+  })
+  .filter((user) => (showOnlineOnly ? onlineUsers.includes(user._id) : true));
+
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -42,7 +48,7 @@ const Sidebar = () => {
             />
             <span className="text-sm">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">({onlineUsers.length} online)</span>
+          <span className="text-xs text-zinc-500">({onlineUsers.length > 1 ? onlineUsers.length-1 : 0 } online)</span>
         </div>
       </div>
 
