@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { chatActions } from "./actions";
+import { chatActions } from "./api/actions";
 
 export const useChatStore = create((set, get) => ({
   messages: [],

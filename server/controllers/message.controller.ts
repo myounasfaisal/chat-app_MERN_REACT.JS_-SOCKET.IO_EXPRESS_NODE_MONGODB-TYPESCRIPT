@@ -6,6 +6,7 @@ import { IUser } from "../types";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { io } from "../server";
+import { onlineUsers } from "../lib/socket";
 
 export const getUsersController = asyncWrapper(async (req: Request, res: Response) => {
     try {
@@ -40,15 +41,29 @@ export const getMessagesController = asyncWrapper(async (req: Request, res: Resp
 
 export const sendMessageController = asyncWrapper(async (req: Request, res: Response) => {
     try {
-        const message : IMessageResponse=await messageService.sendMessages(req);
+        const message: IMessageResponse = await messageService.sendMessages(req);
 
-        if(!message){
-            throw new ApiError("Failed to write message",424);
+        if (!message || !message.message) {
+            throw new ApiError("Failed to write message", 424);
         }
-  io.emit("newMessage", message.message);
-        res.status(200).json(new ApiResponse(200,message,"Message Created Successfully",))
+
+        const receiverSocketId = onlineUsers.get(String(message.message.recieverId));
+        const senderSocketId = onlineUsers.get(String(message.message.senderId));
+
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", message.message);
+            console.log("Reciever Id : ",receiverSocketId);
+        }
+        if (senderSocketId && senderSocketId !== receiverSocketId) {
+            io.to(senderSocketId).emit("newMessage", message.message);
+            console.log("Sender Id : ",senderSocketId);
+        }
+
+        res.status(200).json(
+            new ApiResponse(200, message, "Message Created Successfully")
+        );
 
     } catch (error) {
-
+        console.error("Send Message Error:", error);
     }
-})
+});

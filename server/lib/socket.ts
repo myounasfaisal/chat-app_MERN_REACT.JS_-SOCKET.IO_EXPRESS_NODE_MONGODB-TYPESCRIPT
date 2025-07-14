@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 
 let io: Server;
-const onlineUsers = new Map<string, string>(); // userId => socketId
+const onlineUsers = new Map<string, string>(); 
 
 export const registerSocketServer = (serverIO: Server) => {
   io = serverIO;
@@ -14,7 +14,6 @@ export const registerSocketServer = (serverIO: Server) => {
     if (userId) {
       onlineUsers.set(userId, socket.id);
       io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-      console.log("👥 Online Users:", Array.from(onlineUsers.keys()));
     }
 
     socket.on("disconnect", () => {
@@ -32,4 +31,4 @@ export const registerSocketServer = (serverIO: Server) => {
   });
 };
 
-export { io };
+export { io, onlineUsers }; 
