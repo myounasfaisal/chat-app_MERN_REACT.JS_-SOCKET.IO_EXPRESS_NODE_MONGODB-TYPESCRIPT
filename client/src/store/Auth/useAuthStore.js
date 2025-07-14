@@ -9,8 +9,7 @@ import {
   signUp,
   updateProfile,
 } from "./api/auth";
-
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5050" : "/";
+import { connect, disconnect } from "./api/sockets";
 
 export const useAuthStore = create(
   persist(
@@ -50,40 +49,17 @@ export const useAuthStore = create(
       connectSocket: () => {
         const { authUser, socket } = get();
         if (!authUser || socket?.connected) return;
-
-        const newSocket = io(BASE_URL, {
-          query: {
-            userId: authUser._id, // pass userId
-          },
-          withCredentials: true,
-        });
-
-        set({ socket: newSocket });
-
-        newSocket.on("connect", () => {
-          console.log("✅ Socket connected:", newSocket.id);
-        });
-
-        newSocket.on("disconnect", () => {
-          console.log("❌ Socket disconnected");
-        });
-
-        newSocket.on("onlineUsers", (userIds) => {
-          set({ onlineUsers: userIds });
-        });
+        connect(set,authUser);
       },
 
 
       disconnectSocket: () => {
         const { socket } = get();
-        if (socket && socket.connected) {
-          socket.disconnect();
-          set({ socket: null, onlineUsers: [] });
-        }
+        disconnect(set,socket);
       },
     }),
     {
-      name: "auth-storage", // Storage key in localStorage
+      name: "auth-storage", 
       partialize: (state) => ({
         authUser: state.authUser,
         isUserLoggedIn: state.isUserLoggedIn,
