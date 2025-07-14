@@ -1,12 +1,102 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Chat Application - Client
 
-Currently, two official plugins are available:
+A modern real-time chat application built with React, featuring a clean UI with DaisyUI components and full responsive design.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- 🔐 Secure user authentication
+- 👤 User profiles with avatars
+- 💬 Real-time messaging
+- 🌓 Dark/Light mode support
+- 🔴 Online/Offline status indicators
+- 📷 Image sharing support
+- 📱 Fully responsive design
+- ⚡ Message read status
+- 🔄 Auto-scroll to latest messages
+- 🎨 Modern UI with DaisyUI components
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+
+- **Framework:** React
+- **State Management:** Zustand
+- **Styling:** TailwindCSS + DaisyUI
+- **Real-time Communication:** Socket.io-client
+- **HTTP Client:** Axios
+- **Routing:** React Router DOM
+- **Form Handling:** React Hook Form
+- **Time Formatting:** Day.js
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── common/
+│   │   ├── ChatContainer/
+│   │   ├── Sidebar/
+│   │   └── ...
+│   └── auth/
+├── store/
+│   ├── Auth/
+│   └── Chat/
+├── lib/
+├── hooks/
+└── contexts/
+```
+
+## Getting Started
+
+1. Clone the repository
+2. Navigate to the client directory:
+   ```bash
+   cd chatApp/client
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Create a `.env` file in the client directory with:
+   ```
+   VITE_SERVER_URL=http://localhost:5000
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Features in Detail
+
+### Authentication
+- Secure login and registration
+- Persistent sessions
+- Protected routes
+
+### Chat Features
+- Real-time message delivery
+- Image attachment support
+- Message timestamps
+- Online status indicators
+- Read receipts
+- Auto-scrolling to new messages
+- Loading states and skeletons
+
+### UI/UX
+- Responsive design for all screen sizes
+- Dark/Light theme support
+- Modern and clean interface
+- Loading skeletons for better UX
+- Error handling and notifications
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| VITE_SERVER_URL | Backend API URL |
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
