@@ -1,19 +1,23 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
 const connectDB = async () => {
     try {
-        const connection = await MongoClient.connect(process.env.MONGODB_URI || "")
+        const mongoURI = process.env.MONGODB_URI;
 
-        if (connection) {
-            console.log("Connected With the Database successfully");
+        if (!mongoURI) {
+            console.log("❌ MongoDB URI not found in environment variables");
+            return;
         }
-        else {
-            console.log("Failed To Connect with The Database");
-        }
-    }catch(error){
-        console.error("Error While Connecting With the Database");
+
+        const connection = await mongoose.connect(mongoURI, {
+            dbName: "chatapp", // ✅ explicitly mention DB name if needed
+        });
+
+        console.log(`✅ MongoDB Connected: ${connection.connection.host}`);
+    } catch (error) {
+        console.error("❌ Error while connecting to MongoDB:", error);
+        process.exit(1); // Optional: crash if DB fails
     }
-
-}
+};
 
 export default connectDB;
